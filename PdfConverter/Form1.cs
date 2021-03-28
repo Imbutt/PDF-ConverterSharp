@@ -20,7 +20,7 @@ namespace PdfConverter
 
         private static PdfDocument Document { get; set; } = new PdfDocument();
         public static List<RadioButton> ButtPicList { get; set; } = new List<RadioButton>();
-        public int HighlightedImage { get; set; } = -1;
+        public int HighlightedImageNum { get; set; } = -1;
 
         public string OutputFileName { get; set; } = String.Empty;
         public static WebBrowser PDFReader { get; set; }
@@ -47,76 +47,93 @@ namespace PdfConverter
             
         }
 
-        private void buttonAddImage_Click(object sender, EventArgs e)
+        private void CreateButton(Image img)
         {
+            RadioButton rb = new RadioButton();
+            rb.AutoSize = false;
+            rb.Appearance = Appearance.Button;
+            rb.Size = new Size(buttonImageTemplate.Width, buttonImageTemplate.Height);
 
-            if (openFileDialogImage.ShowDialog() == DialogResult.OK)
+            // Add Image to the button
+            rb.BackgroundImage = img;
+            rb.BackgroundImageLayout = ImageLayout.Stretch;
+
+            //Events
+            rb.Click += new EventHandler(Image_Click);
+
+            ButtPicList.Add(rb);
+
+        }
+
+        private void UpdatePdf()
+        {
+            // Switch between two temp files to avoid reopening the same one and causing a crash
+            if (TempFileNum == 0)
+                TempFileNum = 1;
+            else
+                TempFileNum = 0;
+
+            // Replace PDFReader with a new one
+            if (PDFReader != null)
             {
-                PdfPage page = Document.AddPage();
-                XGraphics gfx = XGraphics.FromPdfPage(page);    // Pdf Graphics class
+                this.Controls.Remove(PDFReader);
+                PDFReader.Dispose();
+            }
+            PDFReader = new WebBrowser();
+            PDFReader.Size = webBrowserPDF.Size;
+            PDFReader.Location = webBrowserPDF.Location;
+            this.Controls.Add(PDFReader);
 
-                string filePath = openFileDialogImage.FileName;
+            // Navigate to the file
+            string tempPath = Path.GetTempPath() + $"PDFConverterTEMP{TempFileNum}.pdf";
+            
+            if(Document.PageCount > 0)
+            {
+                Document.Save(tempPath);
+                PDFReader.Navigate(tempPath);
+                labelPDFReader.Visible = false;
+            }
+            else
+            {
+                PDFReader.Dispose();
+                // Reset document
+                Document.Dispose();
+                Document = new PdfDocument();
 
-
-                if (IsImageValid(filePath))
-                {
-                    XImage image = XImage.FromFile(filePath);    // Get image
-
-                    int[] ps = GetAutoSizeParams(image.PixelWidth, image.PixelHeight,
-                        (int)page.Width, (int)page.Height);
-                    gfx.DrawImage(image, 0, ps[1], ps[2], ps[3]);   // Draw image to pdf page
-                    UpdatePdf();
-
-                    
-                    int offset = 5;
-
-                    RadioButton buttPic = new RadioButton();  // Add Image button object
-                    buttPic.AutoSize = false;
-                    buttPic.Appearance = Appearance.Button;
-
-                    // Posizion and size the button
-                    buttPic.Location = new Point(
-                        (buttonImageTemplate.Width + offset) *
-                        (ButtPicList.Count % 2) ,
-
-                        (buttonImageTemplate.Height + offset) * 
-                        Math.Abs(ButtPicList.Count / 2));
-                    buttPic.Size = new Size(buttonImageTemplate.Width, buttonImageTemplate.Height);
-
-                    // Add Image to the button
-                    buttPic.BackgroundImage = Image.FromFile(filePath);
-                    buttPic.BackgroundImageLayout = ImageLayout.Stretch;
-
-                    //Events
-                    buttPic.Click += new EventHandler(Image_Click);
-                    this.panelPreview.Controls.Add(buttPic);
-
-                    ButtPicList.Add(buttPic); // Add to list
-                }
-                else
-                    MessageBox.Show("Image invalid or corrupted","ERROR");
-
-
-
-
+                labelPDFReader.Visible = true;
 
             }
+            Document.Close();
 
 
         }
 
-        public void Image_Click(object sender,EventArgs e)
+        private void UpdateButtons()
         {
-            // Highlight image
-            RadioButton buttPic = sender as RadioButton;
-            HighlightedImage = ButtPicList.FindIndex(x => x == buttPic);
-            foreach (Button button in ControlButtonsList)
+            int offset = 5;
+
+            // Dispose of all active radio button instances
+            var rbList = panelPreview.Controls.OfType<RadioButton>();
+            foreach(RadioButton rb in rbList)
             {
-                button.Enabled = true;
+                panelPreview.Controls.Remove(rb);
+            }
+
+            // Create new radio button
+            for (int i = 0; i < ButtPicList.Count; i++)
+            {
+                RadioButton rb = ButtPicList[i];
+
+                // Posizion and size the button
+                rb.Location = new Point(
+                    (buttonImageTemplate.Width + offset) * (i % 2),
+                    (buttonImageTemplate.Height + offset) * Math.Abs(i / 2));
+
+                this.panelPreview.Controls.Add(rb);
             }
         }
 
-        private static int[] GetAutoSizeParams(int iw,int ih, int pw, int ph)
+        private static int[] GetAutoSizeParams(int iw, int ih, int pw, int ph)
         {
             // Resize image
             int w = Math.Min(iw, pw);
@@ -126,12 +143,6 @@ namespace PdfConverter
             int y = (ph - h) / 2;
 
             return new int[] { x, y, w, h };
-        }
-
-        private void buttonSave_Click(object sender, EventArgs e)
-        {
-
-                
         }
 
         private bool IsImageValid(string filePath)
@@ -149,32 +160,68 @@ namespace PdfConverter
             }
         }
 
-        private void UpdatePdf()
+        private void buttonAddImage_Click(object sender, EventArgs e)
         {
-            if (TempFileNum == 0)
-                TempFileNum = 1;
-            else
-                TempFileNum = 0;
 
-            if (PDFReader != null)
+            if (openFileDialogImage.ShowDialog() == DialogResult.OK)
             {
-                this.Controls.Remove(PDFReader);
-                PDFReader.Dispose();
+                PdfPage page = Document.AddPage();
+                XGraphics gfx = XGraphics.FromPdfPage(page);    // Pdf Graphics class
+
+                string filePath = openFileDialogImage.FileName;
+
+                if (IsImageValid(filePath))
+                {
+                    XImage image = XImage.FromFile(filePath);    // Get image
+
+                    int[] ps = GetAutoSizeParams(image.PixelWidth, image.PixelHeight,
+                        (int)page.Width, (int)page.Height);
+                    gfx.DrawImage(image, 0, ps[1], ps[2], ps[3]);   // Draw image to pdf page
+                    UpdatePdf();
+
+
+                    // Add button
+                    CreateButton(Image.FromFile(filePath));
+                    UpdateButtons();
+                }
+                else
+                {
+                    MessageBox.Show("Image invalid or corrupted", "ERROR");
+                    Document.Pages.Remove(page);
+                }
+                   
+
+
+
+
+
             }
 
-            PDFReader = new WebBrowser();
-            PDFReader.Size = webBrowserTermplate.Size;
-            PDFReader.Location = webBrowserTermplate.Location;
-            this.Controls.Add(PDFReader);
-            
-
-            string tempPath = Path.GetTempPath() + $"PDFConverterTEMP{TempFileNum}.pdf";
-            Document.Close();
-            Document.Save(tempPath);
-
-            PDFReader.Navigate(tempPath);
 
         }
+
+        public void Image_Click(object sender,EventArgs e)
+        {
+            // Highlight image
+            RadioButton buttPic = sender as RadioButton;
+            HighlightedImageNum = ButtPicList.FindIndex(x => x == buttPic);
+            foreach (Button button in ControlButtonsList)
+            {
+                button.Enabled = true;
+            }
+        }
+
+
+
+        private void buttonSave_Click(object sender, EventArgs e)
+        {
+
+                
+        }
+
+
+
+        
 
         private void toolStripDropDownButton1_Click(object sender, EventArgs e)
         {
@@ -188,14 +235,35 @@ namespace PdfConverter
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (saveFileDialogFile.ShowDialog() == DialogResult.OK)
+            if (Document != null && Document.PageCount > 0)
             {
-                Document.Save(saveFileDialogFile.FileName);
+                if (saveFileDialogFile.ShowDialog() == DialogResult.OK)
+                {
+                    Document.Save(saveFileDialogFile.FileName);
+                }
             }
+            else
+                MessageBox.Show("Can't save document with no pages", "ERROR");
+
         }
 
         private void buttonRemoveImage_Click(object sender, EventArgs e)
         {
+            if (HighlightedImageNum > -1)
+            {
+                // Delete image from PDF
+                Document.Pages.Remove(Document.Pages[HighlightedImageNum]);
+
+                // Delete radiobutton
+                ButtPicList.RemoveAt(HighlightedImageNum);
+
+                HighlightedImageNum = -1;
+
+                UpdateButtons();
+                UpdatePdf();
+            }
+            else
+                MessageBox.Show("Select an image before deleting it", "ERROR");
 
         }
 

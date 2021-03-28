@@ -32,7 +32,8 @@ namespace PdfConverter
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.buttonAddImage = new System.Windows.Forms.Button();
             this.panelPreview = new System.Windows.Forms.Panel();
-            this.webBrowserTermplate = new System.Windows.Forms.WebBrowser();
+            this.buttonImageTemplate = new System.Windows.Forms.Button();
+            this.webBrowserPDF = new System.Windows.Forms.WebBrowser();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripDropDownButtonFile = new System.Windows.Forms.ToolStripDropDownButton();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -41,9 +42,9 @@ namespace PdfConverter
             this.saveFileDialogFile = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialogFile = new System.Windows.Forms.OpenFileDialog();
             this.openFileDialogImage = new System.Windows.Forms.OpenFileDialog();
-            this.buttonImageTemplate = new System.Windows.Forms.Button();
             this.buttonRemoveImage = new System.Windows.Forms.Button();
             this.buttonMoveImage = new System.Windows.Forms.Button();
+            this.labelPDFReader = new System.Windows.Forms.Label();
             this.panelPreview.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -68,14 +69,24 @@ namespace PdfConverter
             this.panelPreview.Size = new System.Drawing.Size(273, 407);
             this.panelPreview.TabIndex = 1;
             // 
-            // webBrowserTermplate
+            // buttonImageTemplate
             // 
-            this.webBrowserTermplate.Location = new System.Drawing.Point(12, 28);
-            this.webBrowserTermplate.MinimumSize = new System.Drawing.Size(20, 20);
-            this.webBrowserTermplate.Name = "webBrowserTermplate";
-            this.webBrowserTermplate.Size = new System.Drawing.Size(330, 433);
-            this.webBrowserTermplate.TabIndex = 4;
-            this.webBrowserTermplate.Visible = false;
+            this.buttonImageTemplate.Location = new System.Drawing.Point(3, 3);
+            this.buttonImageTemplate.Name = "buttonImageTemplate";
+            this.buttonImageTemplate.Size = new System.Drawing.Size(120, 120);
+            this.buttonImageTemplate.TabIndex = 0;
+            this.buttonImageTemplate.Text = "button1";
+            this.buttonImageTemplate.UseVisualStyleBackColor = true;
+            this.buttonImageTemplate.Visible = false;
+            // 
+            // webBrowserPDF
+            // 
+            this.webBrowserPDF.Location = new System.Drawing.Point(12, 28);
+            this.webBrowserPDF.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowserPDF.Name = "webBrowserPDF";
+            this.webBrowserPDF.Size = new System.Drawing.Size(330, 433);
+            this.webBrowserPDF.TabIndex = 4;
+            this.webBrowserPDF.Visible = false;
             // 
             // toolStrip1
             // 
@@ -104,20 +115,20 @@ namespace PdfConverter
             // newToolStripMenuItem
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
             this.newToolStripMenuItem.Text = "New";
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -133,16 +144,6 @@ namespace PdfConverter
             // 
             this.openFileDialogImage.FileName = "openFileDialog1";
             this.openFileDialogImage.RestoreDirectory = true;
-            // 
-            // buttonImageTemplate
-            // 
-            this.buttonImageTemplate.Location = new System.Drawing.Point(3, 3);
-            this.buttonImageTemplate.Name = "buttonImageTemplate";
-            this.buttonImageTemplate.Size = new System.Drawing.Size(120, 120);
-            this.buttonImageTemplate.TabIndex = 0;
-            this.buttonImageTemplate.Text = "button1";
-            this.buttonImageTemplate.UseVisualStyleBackColor = true;
-            this.buttonImageTemplate.Visible = false;
             // 
             // buttonRemoveImage
             // 
@@ -164,15 +165,26 @@ namespace PdfConverter
             this.buttonMoveImage.UseVisualStyleBackColor = true;
             this.buttonMoveImage.Click += new System.EventHandler(this.buttonMoveImage_Click);
             // 
+            // labelPDFReader
+            // 
+            this.labelPDFReader.AutoSize = true;
+            this.labelPDFReader.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelPDFReader.Location = new System.Drawing.Point(17, 199);
+            this.labelPDFReader.Name = "labelPDFReader";
+            this.labelPDFReader.Size = new System.Drawing.Size(320, 48);
+            this.labelPDFReader.TabIndex = 8;
+            this.labelPDFReader.Text = "              No Pages loaded\r\nLoad an image to preview the pdf\r\n";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(796, 500);
+            this.Controls.Add(this.labelPDFReader);
             this.Controls.Add(this.buttonMoveImage);
             this.Controls.Add(this.buttonRemoveImage);
             this.Controls.Add(this.toolStrip1);
-            this.Controls.Add(this.webBrowserTermplate);
+            this.Controls.Add(this.webBrowserPDF);
             this.Controls.Add(this.panelPreview);
             this.Controls.Add(this.buttonAddImage);
             this.Name = "Form1";
@@ -189,7 +201,7 @@ namespace PdfConverter
 
         private System.Windows.Forms.Button buttonAddImage;
         private System.Windows.Forms.Panel panelPreview;
-        private System.Windows.Forms.WebBrowser webBrowserTermplate;
+        private System.Windows.Forms.WebBrowser webBrowserPDF;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButtonFile;
         private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
@@ -201,6 +213,7 @@ namespace PdfConverter
         private System.Windows.Forms.Button buttonImageTemplate;
         private System.Windows.Forms.Button buttonRemoveImage;
         private System.Windows.Forms.Button buttonMoveImage;
+        private System.Windows.Forms.Label labelPDFReader;
     }
 }
 
